@@ -1,14 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES6", // Specify ECMAScript target version
-    "module": "CommonJS", // Specify module code generation
-    "strict": true, // Enable all strict type-checking options
-    "esModuleInterop": true, // Enable compatibility with CommonJS modules
-    "skipLibCheck": true, // Skip type checking of declaration files
-    "forceConsistentCasingInFileNames": true, // Ensure consistent casing in file names
-    "types": ["node"], // Include the node module
-    "outDir": "./dist" // Redirect output structure to the directory
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "target": "ES6",
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"]
+    },
+    "types": ["node"],
+    "typeRoots": ["node_modules/@types"],
+    "skipLibCheck": true,
+    "noEmitOnError": false
   },
-  "include": ["src/**/*"], // Include all files in the src directory and subdirectories
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.*"] // Exclude node_modules and test files
 }
