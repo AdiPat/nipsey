@@ -13,3 +13,11 @@ export const getUserInput = () => {
     });
   });
 };
+
+export const parseUserInput = (input: string) => {
+  const [option, ...text] = input.split(" ");
+  return {
+    option,
+    text: text.join(" "),
+  };
+};

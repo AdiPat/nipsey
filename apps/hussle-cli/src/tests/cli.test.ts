@@ -36,16 +36,10 @@ describe("cli should", () => {
     await run();
     expect(menuSpy).toHaveBeenCalled();
     expect(menuSpy).toHaveBeenCalledWith(
-      "1. Write the next 3 bars. [curBar: current bar]"
+      "1. Write the next N bars. [format: NB <number> <curBar>]"
     );
     expect(menuSpy).toHaveBeenCalledWith(
-      "2. Write the next 7 bars. [curBar: current bar]"
-    );
-    expect(menuSpy).toHaveBeenCalledWith(
-      "3. Write the entire verse of 16 bars. [curBar: current bar]"
-    );
-    expect(menuSpy).toHaveBeenCalledWith(
-      "4. Write the next verse. [curBar: current bar / verse: current verse]"
+      "2. Write the next bar. [format: XB <curBar>]"
     );
   });
 
