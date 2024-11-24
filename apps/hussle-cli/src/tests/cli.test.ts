@@ -9,7 +9,7 @@ describe("cli should", () => {
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("have a run method", () => {
@@ -26,6 +26,7 @@ describe("cli should", () => {
     expect(bannerSpy).toHaveBeenCalledWith(
       chalk.green("Welcome to Hussle CLI.")
     );
+    inputParserSpy.mockRestore();
   });
 
   it("prints the basic menu options", async () => {
@@ -41,6 +42,7 @@ describe("cli should", () => {
     expect(menuSpy).toHaveBeenCalledWith(
       "2. Write the next bar. [format: NX <curBar>]"
     );
+    inputParserSpy.mockRestore();
   });
 
   it("expect the user to enter an input to select an option", async () => {
@@ -49,6 +51,7 @@ describe("cli should", () => {
 
     await run();
     expect(inputParserSpy).toHaveBeenCalled();
+    inputParserSpy.mockRestore();
   });
 
   it.each([
@@ -56,12 +59,30 @@ describe("cli should", () => {
     ["NX this is a bar"],
     ["NB times tense, rhymes immense"],
     ["NX this is a bar 16"],
-  ])("parses a valid user input %s with count %s", async (command) => {
+  ])("parses a valid user input '%s'", async (command) => {
     const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
     inputParserSpy.mockResolvedValue(command);
     const parseUserInputSpy = vi.spyOn(InputParser, "parseUserInput");
     await run();
     expect(parseUserInputSpy).toHaveBeenCalled();
     expect(parseUserInputSpy).toHaveBeenCalledWith(command);
+    parseUserInputSpy.mockReset();
+    inputParserSpy.mockRestore();
+  });
+
+  it.each([
+    ["this is a bar"],
+    ["XX this is a bar"],
+    [""],
+    ["NV this is a bar Y"],
+    ["NA this is a bar  "],
+    ["NP this is a bar \n"],
+  ])("throws error when invalid user input '%s'", async (command) => {
+    const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
+    inputParserSpy.mockImplementation(() => Promise.resolve(command));
+    const promise = run();
+    await expect(promise).rejects.toThrowError(
+      "Error: Required 'queryType' is invalid."
+    );
   });
 });
