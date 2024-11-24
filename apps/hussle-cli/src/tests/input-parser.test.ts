@@ -36,12 +36,13 @@ describe("input parser should", () => {
     ])(
       "should parse the user input string and return an object with the selected option %s (%s) and the input text",
       async (code, option, count) => {
-        const input = `${code} this is a test`;
+        const input = `${code} this is a test ~${count}`;
         const result = await parseUserInput(input);
         expect(result).toEqual({
           option: option,
           text: "this is a test",
           count,
+          context: "",
         });
       }
     );
@@ -73,12 +74,32 @@ describe("input parser should", () => {
     ])(
       "should parse the user input for code = %s  next %s bars with given count and current bar",
       async (code, count) => {
-        const input = `${code} this is a test ${count}`;
+        const input = `${code} this is a test ~${count}`;
         const result = await parseUserInput(input);
         expect(result).toEqual({
           option: code === "NB" ? "WRITE_N_BARS" : "WRITE_NEXT_BAR",
           text: "this is a test",
           count,
+          context: "",
+        });
+      }
+    );
+
+    it.each([
+      ["NB this is a bar ~15 | context", "context", 15],
+      ["NB this is a bar | context multi line", "context multi line", 1],
+      ["NX this is a bar | context", "context", 1],
+      ["NX this is a bar | context", "context", 1],
+    ])(
+      "run command '%s' and extracts the context '%s' along with other details like count '%s",
+      async (command, context, count) => {
+        const input = command;
+        const result = await parseUserInput(input);
+        expect(result).toEqual({
+          option: command.includes("NB") ? "WRITE_N_BARS" : "WRITE_NEXT_BAR",
+          text: "this is a bar",
+          count,
+          context,
         });
       }
     );

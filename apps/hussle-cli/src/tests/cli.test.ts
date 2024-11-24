@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { run } from "../cli";
 import chalk from "chalk";
 import * as InputParser from "../input-parser";
+import * as NipseyLogic from "../nipsey-logic";
 
 describe("cli should", () => {
   beforeEach(() => {
@@ -84,5 +85,20 @@ describe("cli should", () => {
     await expect(promise).rejects.toThrowError(
       "Error: Required 'queryType' is invalid."
     );
+  });
+
+  it("calls the runQuery method with the parsed user input", async () => {
+    const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
+    inputParserSpy.mockResolvedValue("NB this is a test,This is a next bar ~2");
+    const runQuerySpy = vi.spyOn(NipseyLogic, "runQuery");
+    runQuerySpy.mockResolvedValue({} as any);
+    await run();
+    expect(runQuerySpy).toHaveBeenCalled();
+    expect(runQuerySpy).toHaveBeenCalledWith({
+      queryType: "WRITE_N_BARS",
+      bars: ["this is a test", "This is a next bar"],
+      nextBarsCount: 2,
+    });
+    inputParserSpy.mockRestore();
   });
 });

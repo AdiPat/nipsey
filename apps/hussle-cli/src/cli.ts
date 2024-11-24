@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { getUserInput, parseUserInput } from "./input-parser";
 import { menuMap } from "./menu-map";
+import { runQuery } from "./nipsey-logic";
 
 const printBanner = () => {
   console.log(chalk.green("Welcome to Hussle CLI."));
@@ -19,5 +20,10 @@ export async function run() {
   printMenuOptions();
 
   const command = await getUserInput();
-  const _parsedCommand = await parseUserInput(command);
+  const parsedCommand = await parseUserInput(command);
+  const _result = await runQuery({
+    queryType: parsedCommand.option,
+    bars: parsedCommand.text.split(","),
+    nextBarsCount: parsedCommand.count,
+  });
 }

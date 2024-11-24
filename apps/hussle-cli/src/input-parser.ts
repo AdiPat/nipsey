@@ -2,6 +2,8 @@ import readline from "readline";
 import { menuMap } from "./menu-map";
 import { QueryOptions } from "./models";
 
+const DEFAULT_COUNT = 1;
+
 export const getUserInput = (): Promise<string> => {
   return new Promise((resolve, reject) => {
     const rl = readline.createInterface({
@@ -23,9 +25,8 @@ const extractDetectedCode = (input: string) => {
 };
 
 const extractCount = (input: string): number => {
-  const tokens = input.split(" ");
-  const count = parseInt(tokens[tokens.length - 1]);
-  return count;
+  const match = input.match(/~(\d+)/);
+  return match ? parseInt(match[1], 10) : DEFAULT_COUNT;
 };
 
 const extractText = (input: string, count: number): string[] => {
@@ -33,12 +34,30 @@ const extractText = (input: string, count: number): string[] => {
   let remainingText;
 
   if (isNaN(count)) {
-    remainingText = text;
+    remainingText = text.filter((t) => !t.includes("~"));
   } else {
-    remainingText = text.slice(0, text.length - 1);
+    remainingText = text
+      .map((t) => t.trim())
+      .filter((t) => !t.includes("~"))
+      .slice(0, text.length);
   }
 
   return remainingText;
+};
+
+const removeContextFromText = (allText: string): string => {
+  const tokens = allText.split("|");
+  return tokens[0].trim();
+};
+
+const extractContext = (allText: string): string => {
+  const tokens = allText.split("|");
+
+  if (tokens.length === 1) {
+    return "";
+  }
+
+  return tokens[1].trim();
 };
 
 const extractInputComponents = (
@@ -47,11 +66,13 @@ const extractInputComponents = (
   detectedOption: QueryOptions;
   text: string[];
   count?: number;
+  context?: string;
 } => {
   const count = extractCount(input);
   const text = extractText(input, count);
   const detectedOption = extractDetectedCode(input) as QueryOptions;
-  return { detectedOption, text, count };
+  const context = extractContext(input);
+  return { detectedOption, text, count, context };
 };
 
 const setCountDefaultsIfNotProvided = (
@@ -75,9 +96,10 @@ export const parseUserInput = async (
   option: QueryOptions;
   text: string;
   count?: number;
+  context?: string;
 }> => {
   const inputComponents = extractInputComponents(input);
-  const text = inputComponents.text.join(" ");
+  const text = removeContextFromText(inputComponents.text.join(" "));
   const option = inputComponents.detectedOption;
 
   if (!option) {
@@ -93,5 +115,6 @@ export const parseUserInput = async (
     option,
     text,
     count,
+    context: inputComponents.context,
   };
 };
