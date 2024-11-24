@@ -37,8 +37,8 @@ describe("nipsey-logic should", () => {
       expect(generateObjectMock).toHaveBeenCalledWith({
         model: AI.models.GPT_4O_MINI,
         system:
-          "You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given a bar, respond with the next bar.",
-        prompt: "Bar: this is a test",
+          "You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given the bars, respond with the next 1 bars.",
+        prompt: "Bars: this is a test",
         schema: AI.barsSchema,
       });
       generateObjectMock.mockReset();
@@ -66,8 +66,8 @@ describe("nipsey-logic should", () => {
       expect(generateObjectMock).toHaveBeenCalledWith({
         model: AI.models.GPT_4O_MINI,
         system:
-          "You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given a bar, respond with the next bar.",
-        prompt: `Bar: this is a test\nContext: ${context}`,
+          "You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given the bars, respond with the next 1 bars.",
+        prompt: `Bars: this is a test\nContext: ${context}`,
         schema: AI.barsSchema,
       });
       generateObjectMock.mockReset();
@@ -140,5 +140,109 @@ describe("nipsey-logic should", () => {
       });
       generateObjectMock.mockReset();
     });
+
+    it("returns the next N bars if queryType is 'WRITE_NEXT_N_BARS' and the first bar is provided with a valid context", async () => {
+      const context = "This is a motivational rap song.";
+      const initialBars = ["bar 1", "bar 2", "bar 3"];
+      const resultBars = ["bar 4", "bar 5", "bar 6", "bar 7", "bar 8"];
+      const nextBarsCount = 5;
+
+      const options: any = {
+        queryType: "WRITE_N_BARS",
+        bars: initialBars,
+        nextBarsCount,
+        context,
+      };
+
+      const generateObjectMock = vi.spyOn(AI, "generateObject");
+      generateObjectMock.mockResolvedValue({
+        object: {
+          bars: resultBars,
+        },
+      } as any);
+
+      const result: any = await runQuery(options);
+
+      expect(result.bars).toEqual([...initialBars, ...resultBars]);
+      expect(generateObjectMock).toHaveBeenCalled();
+      expect(generateObjectMock).toHaveBeenCalledWith({
+        model: AI.models.GPT_4O_MINI,
+        system: `You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given the bars, respond with the next ${nextBarsCount} bars.`,
+        prompt: `Bars: ${initialBars.join(",\n")}\nContext: ${context}`,
+        schema: AI.barsSchema,
+      });
+      generateObjectMock.mockReset();
+    });
+
+    it("returns a total of 8 bars if nextBarsCount is not specified, queryType is 'WRITE_NEXT_N_BARS' and the first k bars (k < 8) are provided with no valid context", async () => {
+      const initialBars = ["bar 1", "bar 2", "bar 3", "bar 4", "bar 5"];
+      const resultBars = ["bar 6", "bar 7", "bar 8"];
+
+      const options: any = {
+        queryType: "WRITE_N_BARS",
+        bars: initialBars,
+      };
+
+      const generateObjectMock = vi.spyOn(AI, "generateObject");
+      generateObjectMock.mockResolvedValue({
+        object: {
+          bars: resultBars,
+        },
+      } as any);
+
+      const result: any = await runQuery(options);
+
+      expect(result.bars).toEqual([...initialBars, ...resultBars]);
+      expect(generateObjectMock).toHaveBeenCalled();
+      expect(generateObjectMock).toHaveBeenCalledWith({
+        model: AI.models.GPT_4O_MINI,
+        system: `You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given the bars, respond with the next 3 bars.`,
+        prompt: `Bars: ${initialBars.join(",\n")}`,
+        schema: AI.barsSchema,
+      });
+      generateObjectMock.mockReset();
+    });
+
+    it.each([
+      [9, 7],
+      [17, 7],
+      [20, 4],
+      [32, 8],
+      [40, 8],
+    ])(
+      "returns the next closest multiple if nextBarsCount is not specified, queryType is 'WRITE_NEXT_N_BARS' and the first %s bars are provided with no valid context",
+      async (startingBarsCount, pendingBarsCount) => {
+        const initialBars = new Array(startingBarsCount)
+          .fill("bar")
+          .map((_, i) => `bar ${i + 1}`);
+        const resultBars = new Array(pendingBarsCount)
+          .fill("bar")
+          .map((_, i) => `bar ${startingBarsCount + i + 1}`);
+
+        const options: any = {
+          queryType: "WRITE_N_BARS",
+          bars: initialBars,
+        };
+
+        const generateObjectMock = vi.spyOn(AI, "generateObject");
+        generateObjectMock.mockResolvedValue({
+          object: {
+            bars: resultBars,
+          },
+        } as any);
+
+        const result: any = await runQuery(options);
+
+        expect(result.bars).toEqual([...initialBars, ...resultBars]);
+        expect(generateObjectMock).toHaveBeenCalled();
+        expect(generateObjectMock).toHaveBeenCalledWith({
+          model: AI.models.GPT_4O_MINI,
+          system: `You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given the bars, respond with the next ${pendingBarsCount} bars.`,
+          prompt: `Bars: ${initialBars.join(",\n")}`,
+          schema: AI.barsSchema,
+        });
+        generateObjectMock.mockReset();
+      }
+    );
   });
 });
