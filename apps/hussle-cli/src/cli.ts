@@ -21,9 +21,11 @@ export async function run() {
 
   const command = await getUserInput();
   const parsedCommand = await parseUserInput(command);
-  const _result = await runQuery({
+  const { bars } = await runQuery({
     queryType: parsedCommand.option,
     bars: parsedCommand.text.split(","),
     nextBarsCount: parsedCommand.count,
   });
+  const output = bars.join(",\n");
+  console.log(chalk.cyan(output));
 }

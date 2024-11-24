@@ -1,7 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { runQuery } from "../nipsey-logic";
 import { AI } from "../ai";
-import z from "zod";
 
 describe("nipsey-logic should", () => {
   beforeEach(() => {
@@ -244,5 +243,38 @@ describe("nipsey-logic should", () => {
         generateObjectMock.mockReset();
       }
     );
+
+    it("returns the next bar if the given current bar is a large string with multiple gaps", async () => {
+      const initialBars = [
+        "rhymes immense, lines intense, I'm coming off the top to blast off your defence",
+      ];
+      const resultBars = [
+        "I'm the king of the ring, the rap game is my domain",
+      ];
+
+      const options: any = {
+        queryType: "WRITE_NEXT_BAR",
+        bars: initialBars,
+      };
+
+      const generateObjectMock = vi.spyOn(AI, "generateObject");
+      generateObjectMock.mockResolvedValue({
+        object: {
+          bars: resultBars,
+        },
+      } as any);
+
+      const result: any = await runQuery(options);
+
+      expect(result.bars).toEqual([...initialBars, ...resultBars]);
+      expect(generateObjectMock).toHaveBeenCalled();
+      expect(generateObjectMock).toHaveBeenCalledWith({
+        model: AI.models.GPT_4O_MINI,
+        system: `You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given the bars, respond with the next 1 bars.`,
+        prompt: `Bars: ${initialBars.join(",\n")}`,
+        schema: AI.barsSchema,
+      });
+      generateObjectMock.mockReset();
+    });
   });
 });

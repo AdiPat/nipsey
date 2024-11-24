@@ -1,6 +1,7 @@
 import readline from "readline";
 import { menuMap } from "./menu-map";
 import { QueryOptions } from "./models";
+import chalk from "chalk";
 
 const DEFAULT_COUNT = 1;
 
@@ -11,7 +12,7 @@ export const getUserInput = (): Promise<string> => {
       output: process.stdout,
     });
 
-    rl.question("Enter your choice as input:", (answer) => {
+    rl.question(chalk.red("CMD: "), (answer) => {
       resolve(answer);
       rl.close();
     });

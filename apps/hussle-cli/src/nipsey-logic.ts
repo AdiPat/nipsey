@@ -52,7 +52,9 @@ export async function runQuery(options: {
   bars: string[];
   context?: string;
   nextBarsCount?: number;
-}) {
+}): Promise<{
+  bars: string[];
+}> {
   const { bars, context, queryType } = options;
 
   validateQueryType(queryType);
@@ -73,8 +75,9 @@ export async function runQuery(options: {
       schema: AI.barsSchema,
     });
 
+    const result = [...bars, ...object.bars];
     return {
-      bars: [...bars, ...object.bars],
+      bars: result,
     };
   } else if (queryType === "WRITE_NEXT_BAR") {
     const nextBarsCount = 1;
@@ -90,9 +93,9 @@ export async function runQuery(options: {
       system,
       schema: AI.barsSchema,
     });
-
+    const result = [...bars, ...object.bars];
     return {
-      bars: [bars[0], object.bars[0]],
+      bars: result,
     };
   }
 

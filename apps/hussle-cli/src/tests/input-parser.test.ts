@@ -103,5 +103,18 @@ describe("input parser should", () => {
         });
       }
     );
+
+    it("extracts the text correctly from a large bar", async () => {
+      const input =
+        "NX rhymes immense, lines intense, I'm coming off the top to blast off your defence";
+
+      const result = await parseUserInput(input);
+      expect(result).toEqual({
+        option: "WRITE_NEXT_BAR",
+        text: "rhymes immense, lines intense, I'm coming off the top to blast off your defence",
+        count: 1,
+        context: "",
+      });
+    });
   });
 });

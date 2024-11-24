@@ -28,6 +28,7 @@ describe("cli should", () => {
       chalk.green("Welcome to Hussle CLI.")
     );
     inputParserSpy.mockRestore();
+    bannerSpy.mockRestore();
   });
 
   it("prints the basic menu options", async () => {
@@ -91,7 +92,7 @@ describe("cli should", () => {
     const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
     inputParserSpy.mockResolvedValue("NB this is a test,This is a next bar ~2");
     const runQuerySpy = vi.spyOn(NipseyLogic, "runQuery");
-    runQuerySpy.mockResolvedValue({} as any);
+    runQuerySpy.mockResolvedValue({ bars: [] } as any);
     await run();
     expect(runQuerySpy).toHaveBeenCalled();
     expect(runQuerySpy).toHaveBeenCalledWith({
@@ -100,5 +101,23 @@ describe("cli should", () => {
       nextBarsCount: 2,
     });
     inputParserSpy.mockRestore();
+  });
+
+  it("shows the user the output from run query", async () => {
+    const bannerSpy = vi.spyOn(console, "log");
+    const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
+    inputParserSpy.mockResolvedValue("NB this is a test,This is a next bar ~2");
+    const runQuerySpy = vi.spyOn(NipseyLogic, "runQuery");
+    runQuerySpy.mockResolvedValue({
+      bars: ["this is a test", "This is a next bar", "This is a next next bar"],
+    } as any);
+    await run();
+    expect(bannerSpy).toHaveBeenCalledWith(
+      chalk.cyan(
+        "this is a test,\nThis is a next bar,\nThis is a next next bar"
+      )
+    );
+    inputParserSpy.mockRestore();
+    bannerSpy.mockRestore();
   });
 });
