@@ -25,6 +25,7 @@ const extractDetectedCode = (input: string) => {
 const extractCount = (input: string): number => {
   const tokens = input.split(" ");
   const count = parseInt(tokens[tokens.length - 1]);
+
   return count;
 };
 
@@ -69,9 +70,17 @@ export const parseUserInput = async (
     throw new Error("Error: Required 'queryType' is invalid.");
   }
 
+  let finalCount = count;
+
+  if (detectedOption === "WRITE_N_BARS") {
+    finalCount = count || 8;
+  } else if (detectedOption === "WRITE_NEXT_BAR") {
+    finalCount = 1;
+  }
+
   return {
     option: detectedOption,
     text: text.join(" "),
-    count,
+    count: finalCount,
   };
 };

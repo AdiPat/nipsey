@@ -31,17 +31,17 @@ describe("input parser should", () => {
     });
 
     it.each([
-      ["NB", "WRITE_N_BARS"],
-      ["NX", "WRITE_NEXT_BAR"],
+      ["NB", "WRITE_N_BARS", 8],
+      ["NX", "WRITE_NEXT_BAR", 1],
     ])(
       "should parse the user input string and return an object with the selected option %s (%s) and the input text",
-      async (code, option) => {
+      async (code, option, count) => {
         const input = `${code} this is a test`;
         const result = await parseUserInput(input);
         expect(result).toEqual({
           option: option,
           text: "this is a test",
-          count: expect.any(Number),
+          count,
         });
       }
     );
