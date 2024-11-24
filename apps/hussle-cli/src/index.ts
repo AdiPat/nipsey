@@ -1,7 +1,11 @@
 import dotenv from "dotenv";
-
 dotenv.config();
-
 import { run } from "./cli";
 
-run();
+const main = async () => {
+  while (true) {
+    await run();
+  }
+};
+
+main();

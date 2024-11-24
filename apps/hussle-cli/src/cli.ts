@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { getUserInput, parseUserInput } from "./input-parser";
+import { getUserInput, parseUserInput, prettyFormat } from "./input-parser";
 import { menuMap } from "./menu-map";
 import { runQuery } from "./nipsey-logic";
 
@@ -27,5 +27,6 @@ export async function run() {
     nextBarsCount: parsedCommand.count,
   });
   const output = bars.join(",\n");
-  console.log(chalk.cyan(output));
+  const formattedOutput = await prettyFormat(output);
+  console.log(chalk.cyan(formattedOutput));
 }

@@ -111,6 +111,10 @@ describe("cli should", () => {
     runQuerySpy.mockResolvedValue({
       bars: ["this is a test", "This is a next bar", "This is a next next bar"],
     } as any);
+    const prettyFormatSpy = vi.spyOn(InputParser, "prettyFormat");
+    prettyFormatSpy.mockResolvedValue(
+      "this is a test,\nThis is a next bar,\nThis is a next next bar"
+    );
     await run();
     expect(bannerSpy).toHaveBeenCalledWith(
       chalk.cyan(
@@ -119,5 +123,32 @@ describe("cli should", () => {
     );
     inputParserSpy.mockRestore();
     bannerSpy.mockRestore();
+  });
+
+  it("calls pretty formatter and outputs the prettified output to the user", async () => {
+    const bannerSpy = vi.spyOn(console, "log");
+    const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
+    inputParserSpy.mockResolvedValue("NB this is a test,This is a next bar ~2");
+    const prettyFormatSpy = vi.spyOn(InputParser, "prettyFormat");
+    prettyFormatSpy.mockResolvedValue(
+      "this is a test,\nThis is a next bar,\nThis is a next next bar"
+    );
+    const runQuerySpy = vi.spyOn(NipseyLogic, "runQuery");
+    runQuerySpy.mockResolvedValue({
+      bars: ["this is a test", "This is a next bar", "This is a next next bar"],
+    } as any);
+    await run();
+    expect(prettyFormatSpy).toHaveBeenCalled();
+    expect(prettyFormatSpy).toHaveBeenCalledWith(
+      "this is a test,\nThis is a next bar,\nThis is a next next bar"
+    );
+    expect(bannerSpy).toHaveBeenCalledWith(
+      chalk.cyan(
+        "this is a test,\nThis is a next bar,\nThis is a next next bar"
+      )
+    );
+    inputParserSpy.mockRestore();
+    bannerSpy.mockRestore();
+    prettyFormatSpy.mockRestore();
   });
 });

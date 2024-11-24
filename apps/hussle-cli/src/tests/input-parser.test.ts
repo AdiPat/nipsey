@@ -1,8 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import readline from "readline";
-import { getUserInput, parseUserInput } from "../input-parser";
+import { getUserInput, parseUserInput, prettyFormat } from "../input-parser";
+import { AI } from "../ai";
 
 describe("input parser should", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
   describe("getUserInput should", () => {
     it("be defined", () => {
       expect(getUserInput).toBeDefined();
@@ -115,6 +124,29 @@ describe("input parser should", () => {
         count: 1,
         context: "",
       });
+    });
+  });
+
+  describe("prettyFormat should", () => {
+    it("pretty formats the output for the user", async () => {
+      const generateTextMock = vi.spyOn(AI, "generateText");
+      generateTextMock.mockResolvedValue({
+        text: "This is a well formatted string.",
+      } as any);
+
+      const output = "This\nis a well\n formatted string";
+
+      const result: any = await prettyFormat(output);
+
+      expect(result).toEqual("This is a well formatted string.");
+      expect(generateTextMock).toHaveBeenCalled();
+      expect(generateTextMock).toHaveBeenCalledWith({
+        model: AI.models.GPT_4O_MINI,
+        system:
+          "You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given the bars, format and organize the bars properly for the user. Don't edit the content or make changes. Just format it.",
+        prompt: `Output: ${output}`,
+      });
+      generateTextMock.mockReset();
     });
   });
 });

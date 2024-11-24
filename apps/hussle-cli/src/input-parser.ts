@@ -2,6 +2,7 @@ import readline from "readline";
 import { menuMap } from "./menu-map";
 import { QueryOptions } from "./models";
 import chalk from "chalk";
+import { AI } from "./ai";
 
 const DEFAULT_COUNT = 1;
 
@@ -118,4 +119,15 @@ export const parseUserInput = async (
     count,
     context: inputComponents.context,
   };
+};
+
+export const prettyFormat = async (output: string): Promise<string> => {
+  const { text } = await AI.generateText({
+    model: AI.models.GPT_4O_MINI,
+    system:
+      "You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given the bars, format and organize the bars properly for the user. Don't edit the content or make changes. Just format it.",
+    prompt: `Output: ${output}`,
+  });
+
+  return text;
 };
