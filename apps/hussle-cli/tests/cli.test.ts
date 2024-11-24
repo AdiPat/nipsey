@@ -1,14 +1,24 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { run } from "../cli";
 import chalk from "chalk";
-import readline from "readline";
+import * as InputParser from "../input-parser";
 
 describe("cli should", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
   it("have a run method", () => {
     expect(run).toBeDefined();
   });
 
   it("print a banner title", async () => {
+    const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
+    inputParserSpy.mockResolvedValue("1. this is a test");
     const bannerSpy = vi.spyOn(console, "log");
 
     await run();
@@ -19,6 +29,9 @@ describe("cli should", () => {
   });
 
   it("prints the basic menu options", async () => {
+    const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
+    inputParserSpy.mockResolvedValue("1. this is a test");
+
     const menuSpy = vi.spyOn(console, "log");
     await run();
     expect(menuSpy).toHaveBeenCalled();
@@ -37,18 +50,10 @@ describe("cli should", () => {
   });
 
   it("expect the user to enter an input to select an option", async () => {
-    const questionMock = vi.fn();
-    const readlineSpy = vi.spyOn(readline, "createInterface").mockReturnValue({
-      question: questionMock,
-      close: vi.fn(),
-    } as any);
+    const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
+    inputParserSpy.mockResolvedValue("1. this is a test");
 
     await run();
-    expect(readlineSpy).toHaveBeenCalled();
-    expect(questionMock).toHaveBeenCalled();
-    expect(questionMock).toHaveBeenCalledWith(
-      "Enter your voice as input",
-      expect.any(Function)
-    );
+    expect(inputParserSpy).toHaveBeenCalled();
   });
 });
