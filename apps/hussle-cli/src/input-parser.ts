@@ -25,13 +25,11 @@ const extractDetectedCode = (input: string) => {
 const extractCount = (input: string): number => {
   const tokens = input.split(" ");
   const count = parseInt(tokens[tokens.length - 1]);
-
   return count;
 };
 
 const extractText = (input: string, count: number): string[] => {
   let [_, ...text] = input.split(" ");
-
   let remainingText;
 
   if (isNaN(count)) {
@@ -53,8 +51,22 @@ const extractInputComponents = (
   const count = extractCount(input);
   const text = extractText(input, count);
   const detectedOption = extractDetectedCode(input) as QueryOptions;
-
   return { detectedOption, text, count };
+};
+
+const setCountDefaultsIfNotProvided = (
+  count: number | undefined,
+  detectedOption: QueryOptions
+) => {
+  let finalCount;
+
+  if (detectedOption === "WRITE_N_BARS") {
+    finalCount = count || 8;
+  } else if (detectedOption === "WRITE_NEXT_BAR") {
+    finalCount = 1;
+  }
+
+  return finalCount;
 };
 
 export const parseUserInput = async (
@@ -64,23 +76,22 @@ export const parseUserInput = async (
   text: string;
   count?: number;
 }> => {
-  const { detectedOption, text, count } = extractInputComponents(input);
+  const inputComponents = extractInputComponents(input);
+  const text = inputComponents.text.join(" ");
+  const option = inputComponents.detectedOption;
 
-  if (!detectedOption) {
+  if (!option) {
     throw new Error("Error: Required 'queryType' is invalid.");
   }
 
-  let finalCount = count;
-
-  if (detectedOption === "WRITE_N_BARS") {
-    finalCount = count || 8;
-  } else if (detectedOption === "WRITE_NEXT_BAR") {
-    finalCount = 1;
-  }
+  const count = setCountDefaultsIfNotProvided(
+    inputComponents.count,
+    inputComponents.detectedOption
+  );
 
   return {
-    option: detectedOption,
-    text: text.join(" "),
-    count: finalCount,
+    option,
+    text,
+    count,
   };
 };
