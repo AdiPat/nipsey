@@ -30,13 +30,57 @@ describe("input parser should", () => {
       expect(parseUserInput).toBeDefined();
     });
 
-    it("should parse the user input string and return an object with the selected option and the input text", async () => {
-      const input = "NB this is a test";
-      const result = await parseUserInput(input);
-      expect(result).toEqual({
-        option: "WRITE_N_BARS",
-        text: "this is a test",
-      });
-    });
+    it.each([
+      ["NB", "WRITE_N_BARS"],
+      ["NX", "WRITE_NEXT_BAR"],
+    ])(
+      "should parse the user input string and return an object with the selected option %s (%s) and the input text",
+      async (code, option) => {
+        const input = `${code} this is a test`;
+        const result = await parseUserInput(input);
+        expect(result).toEqual({
+          option: option,
+          text: "this is a test",
+          count: expect.any(Number),
+        });
+      }
+    );
+
+    it.each([
+      ["NA", "this is a test"],
+      ["XX", "this is a test"],
+      ["", "this is a test"],
+      [" ", "this is a test"],
+      ["\n", "this is a test"],
+    ])(
+      "should throw an error if queryType is invalid if the code is [%s] and the text is [%s]",
+      async (code, bar) => {
+        const input = `${code} ${bar}`;
+        const result = parseUserInput(input);
+        await expect(result).rejects.toThrowError(
+          "Error: Required 'queryType' is invalid."
+        );
+      }
+    );
+
+    it.each([
+      ["NB", 5],
+      ["NB", 3],
+      ["NB", 16],
+      ["NB", 20],
+      ["NB", 8],
+      ["NB", 30],
+    ])(
+      "should parse the user input for code = %s  next %s bars with given count and current bar",
+      async (code, count) => {
+        const input = `${code} this is a test ${count}`;
+        const result = await parseUserInput(input);
+        expect(result).toEqual({
+          option: code === "NB" ? "WRITE_N_BARS" : "WRITE_NEXT_BAR",
+          text: "this is a test",
+          count,
+        });
+      }
+    );
   });
 });
