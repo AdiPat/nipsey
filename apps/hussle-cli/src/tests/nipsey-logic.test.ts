@@ -83,7 +83,7 @@ describe("nipsey-logic should", () => {
 
       const result: any = runQuery(options);
 
-      expect(result).rejects.toThrowError(
+      await expect(result).rejects.toThrowError(
         "Error: Required 'queryType' can't be NA. "
       );
       expect(generateObjectMock).not.toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe("nipsey-logic should", () => {
 
         const result: any = runQuery(options);
 
-        expect(result).rejects.toThrowError(
+        await expect(result).rejects.toThrowError(
           "Error: Required 'queryType' can't be NA. "
         );
         expect(generateObjectMock).not.toHaveBeenCalled();
