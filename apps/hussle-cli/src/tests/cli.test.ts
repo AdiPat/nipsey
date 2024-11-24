@@ -151,4 +151,30 @@ describe("cli should", () => {
     bannerSpy.mockRestore();
     prettyFormatSpy.mockRestore();
   });
+
+  it("starts and stops spinner while the output is loading", async () => {
+    const startMock = vi.fn();
+    const stopMock = vi.fn();
+    startMock.mockReturnValue({
+      stop: stopMock,
+    });
+    vi.mock("ora", () => {
+      return {
+        start: startMock,
+      };
+    });
+    const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
+    inputParserSpy.mockResolvedValue("NB this is a test,This is a next bar ~2");
+    const prettyFormatSpy = vi.spyOn(InputParser, "prettyFormat");
+    prettyFormatSpy.mockResolvedValue(
+      "this is a test,\nThis is a next bar,\nThis is a next next bar"
+    );
+    const runQuerySpy = vi.spyOn(NipseyLogic, "runQuery");
+    runQuerySpy.mockResolvedValue({
+      bars: ["this is a test", "This is a next bar", "This is a next next bar"],
+    } as any);
+    await run();
+    expect(startMock).toHaveBeenCalled();
+    expect(stopMock).toHaveBeenCalled();
+  });
 });

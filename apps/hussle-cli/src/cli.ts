@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { getUserInput, parseUserInput, prettyFormat } from "./input-parser";
 import { menuMap } from "./menu-map";
 import { runQuery } from "./nipsey-logic";
+import ora from "ora";
 
 const printBanner = () => {
   console.log(chalk.green("Welcome to Hussle CLI."));
@@ -21,6 +22,7 @@ export async function run() {
 
   const command = await getUserInput();
   const parsedCommand = await parseUserInput(command);
+  const spinner = ora("Loading bars...").start();
   const { bars } = await runQuery({
     queryType: parsedCommand.option,
     bars: parsedCommand.text.split(","),
@@ -28,5 +30,6 @@ export async function run() {
   });
   const output = bars.join(",\n");
   const formattedOutput = await prettyFormat(output);
+  spinner.stop();
   console.log(chalk.cyan(formattedOutput));
 }
