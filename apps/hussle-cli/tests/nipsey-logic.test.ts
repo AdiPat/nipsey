@@ -41,6 +41,7 @@ describe("nipsey-logic should", () => {
         prompt: "Bar: this is a test",
         schema: AI.barsSchema,
       });
+      generateObjectMock.mockReset();
     });
 
     it("should write the next bar if query type is 'WRITE_NEXT_BAR' and 'context' is provided", async () => {
@@ -69,6 +70,7 @@ describe("nipsey-logic should", () => {
         prompt: `Bar: this is a test\nContext: ${context}`,
         schema: AI.barsSchema,
       });
+      generateObjectMock.mockReset();
     });
 
     it("throws an error if queryType is NA", async () => {
@@ -85,6 +87,7 @@ describe("nipsey-logic should", () => {
         "Error: Required 'queryType' can't be NA. "
       );
       expect(generateObjectMock).not.toHaveBeenCalled();
+      generateObjectMock.mockReset();
     });
 
     it.each([null, undefined, "", " ", "\n"])(
@@ -103,35 +106,39 @@ describe("nipsey-logic should", () => {
           "Error: Required 'queryType' can't be NA. "
         );
         expect(generateObjectMock).not.toHaveBeenCalled();
+        generateObjectMock.mockReset();
       }
     );
 
-    it.skip("returns the next N bars if queryType is 'WRITE_NEXT_N_BARS' and the first bar is provided", async () => {
-      const context = "This is a motivational rap song.";
+    it("returns the next N bars if queryType is 'WRITE_NEXT_N_BARS' and the first bar is provided with no context", async () => {
+      const initialBars = ["bar 1", "bar 2", "bar 3"];
+      const resultBars = ["bar 4", "bar 5", "bar 6", "bar 7", "bar 8"];
+      const nextBarsCount = 5;
+
       const options: any = {
-        queryType: "WRITE_NEXT_BAR",
-        bars: ["this is a test"],
-        context,
+        queryType: "WRITE_N_BARS",
+        bars: initialBars,
+        nextBarsCount,
       };
 
       const generateObjectMock = vi.spyOn(AI, "generateObject");
       generateObjectMock.mockResolvedValue({
         object: {
-          bars: ["this is the next bar"],
+          bars: resultBars,
         },
       } as any);
 
       const result: any = await runQuery(options);
 
-      expect(result.bars).toEqual(["this is a test", "this is the next bar"]);
+      expect(result.bars).toEqual([...initialBars, ...resultBars]);
       expect(generateObjectMock).toHaveBeenCalled();
       expect(generateObjectMock).toHaveBeenCalledWith({
         model: AI.models.GPT_4O_MINI,
-        system:
-          "You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given a bar, respond with the next bar.",
-        prompt: `Bar: this is a test\nContext: ${context}`,
+        system: `You are an AI Rap Agent. You are an expert in Hip Hop. You are a rapper. Given the bars, respond with the next ${nextBarsCount} bars.`,
+        prompt: `Bars: ${initialBars.join(",\n")}`,
         schema: AI.barsSchema,
       });
+      generateObjectMock.mockReset();
     });
   });
 });
