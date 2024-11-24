@@ -11,6 +11,6 @@ export const menuMap: {
   "2": {
     code: "NX",
     option: "WRITE_NEXT_BAR",
-    text: "Write the next bar. [format: XB <curBar>]",
+    text: "Write the next bar. [format: NX <curBar>]",
   },
 };

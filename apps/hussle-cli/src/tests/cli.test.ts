@@ -39,7 +39,7 @@ describe("cli should", () => {
       "1. Write the next N bars. [format: NB <number> <curBar>]"
     );
     expect(menuSpy).toHaveBeenCalledWith(
-      "2. Write the next bar. [format: XB <curBar>]"
+      "2. Write the next bar. [format: NX <curBar>]"
     );
   });
 
