@@ -31,10 +31,10 @@ describe("input parser should", () => {
     });
 
     it("should parse the user input string and return an object with the selected option and the input text", async () => {
-      const input = "1 this is a test";
+      const input = "NB this is a test";
       const result = await parseUserInput(input);
       expect(result).toEqual({
-        option: "1",
+        option: "WRITE_N_BARS",
         text: "this is a test",
       });
     });

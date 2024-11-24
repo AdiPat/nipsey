@@ -1,4 +1,6 @@
 import readline from "readline";
+import { menuMap } from "./menu-map";
+import { QueryOptions } from "./models";
 
 export const getUserInput = () => {
   return new Promise((resolve, reject) => {
@@ -14,10 +16,20 @@ export const getUserInput = () => {
   });
 };
 
-export const parseUserInput = (input: string) => {
-  const [option, ...text] = input.split(" ");
+export const parseUserInput = (
+  input: string
+): {
+  option: QueryOptions;
+  text: string;
+} => {
+  const [detectedCode, ...text] = input.split(" ");
+
+  const detectedOption = Object.values(menuMap).find(
+    (menuItem) => menuItem.code === detectedCode
+  )?.option as QueryOptions;
+
   return {
-    option,
+    option: detectedOption,
     text: text.join(" "),
   };
 };
