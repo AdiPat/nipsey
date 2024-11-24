@@ -2,7 +2,7 @@ import readline from "readline";
 import { menuMap } from "./menu-map";
 import { QueryOptions } from "./models";
 
-export const getUserInput = () => {
+export const getUserInput = (): Promise<string> => {
   return new Promise((resolve, reject) => {
     const rl = readline.createInterface({
       input: process.stdin,

@@ -18,7 +18,7 @@ describe("cli should", () => {
 
   it("print a banner title", async () => {
     const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
-    inputParserSpy.mockResolvedValue("1. this is a test");
+    inputParserSpy.mockResolvedValue("NB this is a test");
     const bannerSpy = vi.spyOn(console, "log");
 
     await run();
@@ -30,7 +30,7 @@ describe("cli should", () => {
 
   it("prints the basic menu options", async () => {
     const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
-    inputParserSpy.mockResolvedValue("1. this is a test");
+    inputParserSpy.mockResolvedValue("NX this is a test");
 
     const menuSpy = vi.spyOn(console, "log");
     await run();
@@ -45,9 +45,23 @@ describe("cli should", () => {
 
   it("expect the user to enter an input to select an option", async () => {
     const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
-    inputParserSpy.mockResolvedValue("1. this is a test");
+    inputParserSpy.mockResolvedValue("NB this is a test");
 
     await run();
     expect(inputParserSpy).toHaveBeenCalled();
+  });
+
+  it.each([
+    ["NB this is a bar"],
+    ["NX this is a bar"],
+    ["NB times tense, rhymes immense"],
+    ["NX this is a bar 16"],
+  ])("parses a valid user input %s with count %s", async (command) => {
+    const inputParserSpy = vi.spyOn(InputParser, "getUserInput");
+    inputParserSpy.mockResolvedValue(command);
+    const parseUserInputSpy = vi.spyOn(InputParser, "parseUserInput");
+    await run();
+    expect(parseUserInputSpy).toHaveBeenCalled();
+    expect(parseUserInputSpy).toHaveBeenCalledWith(command);
   });
 });

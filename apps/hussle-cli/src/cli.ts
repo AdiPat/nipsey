@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { getUserInput } from "./input-parser";
+import { getUserInput, parseUserInput } from "./input-parser";
 import { menuMap } from "./menu-map";
 
 const printBanner = () => {
@@ -18,5 +18,6 @@ export async function run() {
   printBanner();
   printMenuOptions();
 
-  const _answer = await getUserInput();
+  const command = await getUserInput();
+  const _parsedCommand = await parseUserInput(command);
 }
